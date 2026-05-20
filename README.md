@@ -37,7 +37,7 @@ f0679c2bca3a9923c84ea0d782537ea5453f6ae08d23ca05d08c4ac82eb6054f
 295c3938e3a182132066dcff62f13b104f14408e92e353fe6612c07d338c6420
 ```
 <br>Hash generator
-Use the `hash_generator.py` for create your own target. Simply run it, enter your passord, and copy the     hash into `hashes.txt`.
+Use the `hash_generator.py` for create your own target. Simply run it, enter your passord, and copy the hash into `hashes.txt` and replace `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` by your hash in `index.html`.
 
 ## Lesson
 Password complexity is a myth if you rely on personal data. An automated tool can test thousands of combinations in seconds.
