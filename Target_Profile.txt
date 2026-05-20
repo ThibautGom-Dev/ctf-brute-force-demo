@@ -1,0 +1,14 @@
+=======================================
+       TARGET PROFILE: JOHN DOE
+=======================================
+Name: John Doe
+Date of Birth: 1990
+City: Seattle, WA
+Pet: A golden retriever named "buster"
+Hobbies: Baseball, hiking
+Favorite Number: 13
+=======================================
+NOTE FOR THE ATTACKER: 
+Create a 'words.txt' file and put the most likely 
+keywords from this profile inside it (one per line).
+=======================================

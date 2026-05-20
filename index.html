@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Login Server</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; background-color: #121212; color: #00ff00; text-align: center; margin-top: 100px; }
+        .login-box { border: 2px solid #00ff00; padding: 40px; display: inline-block; background-color: #1e1e1e; box-shadow: 0 0 15px #00ff00; }
+        input[type="text"], input[type="password"] { padding: 10px; margin: 10px; width: 80%; background-color: #000; border: 1px solid #00ff00; color: #00ff00; }
+        button { padding: 10px 20px; background-color: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        button:hover { background-color: #00cc00; }
+        #success-screen { display: none; margin-top: 20px; color: #ffffff; }
+        .disclaimer { border: 1px solid #ff0000; background-color: #4a0000; padding: 20px; margin-top: 20px; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box" id="login-screen">
+        <h2>SECURE LOGIN PORTAL</h2>
+        <p>Simulation - CTF Environment</p>
+        <input type="text" id="username" value="john.doe" readonly><br>
+        <input type="password" id="password" placeholder="Enter Password"><br>
+        <button onclick="checkPassword()">Login</button>
+        <p id="error-msg" style="color: red; display: none;">Access Denied. Incorrect Password.</p>
+    </div>
+
+    <div id="success-screen">
+        <h1 style="color: #00ff00;">ACCESS GRANTED! 🎉</h1>
+        <h2>Well done! You successfully cracked the password.</h2>
+        
+        <div class="disclaimer">
+            <h3 style="color: #ff4444;">⚠️ CYBERSECURITY LESSON & DISCLAIMER</h3>
+            <p>This exercise demonstrates how easily attackers can guess passwords if you base them on personal information (pets, birth years, hobbies).</p>
+            <ul>
+                <li>Adding a capital letter and a number at the end (e.g., <i>Buster1990!</i>) <strong>DOES NOT</strong> make a password strong. Hacking algorithms test these combinations in milliseconds.</li>
+                <li><strong>Defense:</strong> Use long passphrases (e.g., <i>BlueHorseRunningFast!</i>) or a Password Manager to generate random strings.</li>
+                <li><i>Note: This is an educational tool. Never use cracking tools on systems you do not own.</i></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Fonction pour calculer le hash SHA-256 directement dans le navigateur
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        async function checkPassword() {
+            var pwd = document.getElementById("password").value;
+            
+            // Les hashs correspondants aux 3 niveaux (au lieu des mots de passe en clair !)
+            var validHashes = [
+                "950341bb252ee3b8dd426db1a052ff6de502e9bc47da153aaeb2e11e8c07d353", // buster
+                "21c9a87d0ec7784f1837482f347895240c4ccfb23b2c349a75d506ab6488d0b2", // Buster1990
+                "c4da3330663fc8a2eb3676c4db618e7d2ec6cd0ea11fce0d6afb1e102f4a5c53"  // Bust3r1990!
+            ];
+            
+            // On calcule le hash du mot de passe entré par l'utilisateur
+            var inputHash = await sha256(pwd);
+
+            // On compare ce hash avec notre liste
+            if (validHashes.includes(inputHash)) {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("success-screen").style.display = "block";
+            } else {
+                document.getElementById("error-msg").style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+</html>
