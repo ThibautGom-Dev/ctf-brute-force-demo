@@ -17,9 +17,9 @@ Educational CTF lab demonstrating the risks of using personal information in pas
 ```
 
 ## Setup
-1. Analyze: Read `target_profile.txt` to find keyworlds.
+1. Analyze: Read `target_profile.txt` to find keywords.
 2. Configure: Setup `words.txt` file and populate it with potential passwords (e.g., john, ...).
-3. Run: Setup `hashes.txt` with hash level and execute the script: `python bruteforce_ctf.py`.
+3. Run: Copy a hash from the section below into `hashes.txt`, then run `python bruteforce_ctf.py`. You can also pass arguments directly: `python bruteforce_ctf.py --dict words.txt --hash <hash>`.
 4. Verify: Once the password is found, test it on the `index.html` login page.
 
 ## Hash

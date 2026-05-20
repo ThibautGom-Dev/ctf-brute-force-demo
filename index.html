@@ -28,16 +28,19 @@
         <h2>SECURE LOGIN PORTAL</h2>
         <p>Simulation - CTF Environment</p>
         <input type="text" id="username" value="john.doe" readonly><br>
-        <input type="password" id="password" placeholder="Enter Password"><br>
+        <input type="password" id="password" placeholder="Enter Password"
+               onkeydown="if(event.key==='Enter') checkPassword()"
+               oninput="document.getElementById('error-msg').style.display='none'"><br>
         <button onclick="checkPassword()">Login</button>
         <p id="error-msg" style="color: red; display: none;">Access Denied. Incorrect Password.</p>
     </div>
 
     <div id="success-screen">
         <h1 style="color: #00ff00;">ACCESS GRANTED! 🎉</h1>
-        
+
         <div id="level-message"></div>
-        
+        <button onclick="resetLogin()" style="margin-top: 15px;">Try Another Level</button>
+
         <div class="disclaimer">
             <h3 style="color: #ff4444;">⚠️ CYBERSECURITY LESSON & DISCLAIMER</h3>
             <p>This exercise demonstrates how easily attackers can guess passwords if you base them on personal information (pets, birth years, hobbies).</p>
@@ -50,6 +53,13 @@
     </div>
 
     <script>
+        function resetLogin() {
+            document.getElementById("login-screen").style.display = "block";
+            document.getElementById("success-screen").style.display = "none";
+            document.getElementById("password").value = "";
+            document.getElementById("error-msg").style.display = "none";
+        }
+
         function checkPassword() {
             var pwd = document.getElementById("password").value;
             
