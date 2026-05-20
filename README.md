@@ -23,15 +23,18 @@ Educational CTF lab demonstrating the risks of using personal information in pas
 4. Verify: Once the password is found, test it on the `index.html` login page.
 
 ## Hash
-1. You can choose your difficulty level (copy the hash into `hashes.txt`).<br>
+1. You can choose your difficulty level (copy the hash into `hashes.txt`).
+<br>
 Lvl 1 :
 ```text
 f0679c2bca3a9923c84ea0d782537ea5453f6ae08d23ca05d08c4ac82eb6054f
 ```
+<br>
 Lvl 2 :
 ```text
 36083c3e0673c10458c029bd8af552468a60161dbe23032c6ff6811341d21f89
 ```
+<br>
 Lvl 3 :
 ```text
 295c3938e3a182132066dcff62f13b104f14408e92e353fe6612c07d338c6420
