@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Target Login Server</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body { font-family: 'Courier New', Courier, monospace; background-color: #121212; color: #00ff00; text-align: center; margin-top: 100px; }
         .login-box { border: 2px solid #00ff00; padding: 40px; display: inline-block; background-color: #1e1e1e; box-shadow: 0 0 15px #00ff00; }
@@ -11,6 +12,13 @@
         button { padding: 10px 20px; background-color: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         button:hover { background-color: #00cc00; }
         #success-screen { display: none; margin-top: 20px; color: #ffffff; }
+        
+        #level-message { font-size: 24px; font-weight: bold; margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .lvl1-style { background-color: #1a4a1a; border: 2px solid #00ff00; color: #00ff00; }
+        .lvl2-style { background-color: #4a4a00; border: 2px solid #ffff00; color: #ffff00; }
+        .lvl3-style { background-color: #4a1a1a; border: 2px solid #ff0000; color: #ff5555; }
+        .custom-style { background-color: #3a1a4a; border: 2px solid #cc00ff; color: #eebbff; }
+
         .disclaimer { border: 1px solid #ff0000; background-color: #4a0000; padding: 20px; margin-top: 20px; text-align: left; }
     </style>
 </head>
@@ -27,7 +35,8 @@
 
     <div id="success-screen">
         <h1 style="color: #00ff00;">ACCESS GRANTED! 🎉</h1>
-        <h2>Well done! You successfully cracked the password.</h2>
+        
+        <div id="level-message"></div>
         
         <div class="disclaimer">
             <h3 style="color: #ff4444;">⚠️ CYBERSECURITY LESSON & DISCLAIMER</h3>
@@ -41,33 +50,42 @@
     </div>
 
     <script>
-        // Fonction pour calculer le hash SHA-256 directement dans le navigateur
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hashHex;
-        }
-
-        async function checkPassword() {
+        function checkPassword() {
             var pwd = document.getElementById("password").value;
             
-            // Les hashs correspondants aux 3 niveaux (au lieu des mots de passe en clair !)
+            // Les hashs correspondants aux différents niveaux
             var validHashes = [
-                "f0679c2bca3a9923c84ea0d782537ea5453f6ae08d23ca05d08c4ac82eb6054f", // lvl1
-                "36083c3e0673c10458c029bd8af552468a60161dbe23032c6ff6811341d21f89", // lvl2
-                "295c3938e3a182132066dcff62f13b104f14408e92e353fe6612c07d338c6420",  // lvl3
-                "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" //Add your custom hash here
+                "f0679c2bca3a9923c84ea0d782537ea5453f6ae08d23ca05d08c4ac82eb6054f", // Index 0 : lvl1
+                "36083c3e0673c10458c029bd8af552468a60161dbe23032c6ff6811341d21f89", // Index 1 : lvl2
+                "804cedc94fb1f9f2eb698b4742029017a1ce23176cd4022aff2171d721983630", // Index 2 : lvl3
+                "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  // Index 3 : Custom
             ];
-            
-            // On calcule le hash du mot de passe entré par l'utilisateur
-            var inputHash = await sha256(pwd);
 
-            // On compare ce hash avec notre liste
-            if (validHashes.includes(inputHash)) {
+            // Textes personnalisés pour chaque niveau
+            var successMessages = [
+                "🟢 LEVEL 1 CLEARED: You cracked the repetitive password!",
+                "🟡 LEVEL 2 CLEARED: You defeated the Leetspeak rules!",
+                "🔴 LEVEL 3 CLEARED (BOSS): Amazing! You cracked the complex combination!",
+                "🟣 CUSTOM LEVEL CLEARED: You beat the personalized hash!"
+            ];
+
+            // Styles (classes CSS) pour chaque niveau
+            var successStyles = ["lvl1-style", "lvl2-style", "lvl3-style", "custom-style"];
+            
+            // Calcul du hash avec CryptoJS (fonctionne parfaitement en local sans serveur)
+            var inputHash = CryptoJS.SHA256(pwd).toString();
+
+            // On cherche la position (l'index) du hash dans notre tableau
+            var levelIndex = validHashes.indexOf(inputHash);
+
+            if (levelIndex !== -1) {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("success-screen").style.display = "block";
+                
+                var messageBox = document.getElementById("level-message");
+                messageBox.innerText = successMessages[levelIndex];
+                messageBox.className = successStyles[levelIndex];
+                
             } else {
                 document.getElementById("error-msg").style.display = "block";
             }
