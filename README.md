@@ -23,12 +23,12 @@ Educational CTF lab demonstrating the risks of using personal information in pas
 4. Verify: Once the password is found, test it on the `index.html` login page.
 
 ## Hash
-You can choose your difficulty level (copy the hash into `hashes.txt`) :
-  Lvl 1 : x
-  Lvl 2 : x
-  Lvl 3 : x
-Hash generator
-  Use the `hash_generator.py` for create your own target. Simply run it, enter your passord, and copy the     hash into `hashes.txt`.
+1. You can choose your difficulty level (copy the hash into `hashes.txt`) :
+Lvl 1 : x
+Lvl 2 : x
+Lvl 3 : x
+2. Hash generator
+Use the `hash_generator.py` for create your own target. Simply run it, enter your passord, and copy the     hash into `hashes.txt`.
 
 ## Lesson
 Password complexity is a myth if you rely on personal data. An automated tool can test thousands of combinations in seconds.
