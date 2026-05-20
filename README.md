@@ -24,10 +24,19 @@ Educational CTF lab demonstrating the risks of using personal information in pas
 
 ## Hash
 1. You can choose your difficulty level (copy the hash into `hashes.txt`).
-Lvl 1 : x
-Lvl 2 : x
-Lvl 3 : x
-2. Hash generator
+Lvl 1 :
+```text
+f0679c2bca3a9923c84ea0d782537ea5453f6ae08d23ca05d08c4ac82eb6054f
+```
+Lvl 2 :
+```text
+36083c3e0673c10458c029bd8af552468a60161dbe23032c6ff6811341d21f89
+```
+Lvl 3 :
+```text
+295c3938e3a182132066dcff62f13b104f14408e92e353fe6612c07d338c6420
+```
+3. Hash generator
 Use the `hash_generator.py` for create your own target. Simply run it, enter your passord, and copy the     hash into `hashes.txt`.
 
 ## Lesson
