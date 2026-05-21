@@ -47,49 +47,86 @@ class PasswordMutator:
             'b': ['b', '8'], 'B': ['B', '8'],
             'g': ['g', '9'], 'G': ['G', '9']
         }
-        # Symbols that can wrap the password (prefix / suffix)
-        self.terminators = ['', '!', '?', '@', '#']
-        # Numeric suffixes commonly appended to passwords (birth years, lucky numbers, etc.)
-        self.num_suffixes = ['', '1', '13', '90', '1990', '123', '2024']
+        # Used as both prefix and suffix: symbols + numbers can appear on either side.
+        # Level examples:  BusterBuster        → ('', root, '')
+        #                  Bust3rBust3r!        → ('', root, '!')
+        #                  1Bust3rS3attel1990!  → ('1', root, '!')
+        self.affixes = ['', '!', '?', '@', '#', '1', '13', '90', '1990', '123', '2024']
 
-    def variant_generator(self, word):
-        """Generates variants with leetspeak substitutions and common affixes."""
-        word = word.strip()
-        if not word:
-            return
+    def leet_variants(self, word, max_subs=2):
+        """Yield leet variants sorted by substitution count (fewest first).
 
-        grids = [self.common_subs.get(char, [char]) for char in word]
+        max_subs caps how many characters can differ from the original, which
+        keeps the per-word variant count small (a 7-char word stays under ~100
+        variants vs ~400 unbounded) while still covering realistic passwords.
+        """
+        grids = [self.common_subs.get(c, [c]) for c in word]
+        combos = list(itertools.product(*grids))
+        combos.sort(key=lambda combo: sum(a != b for a, b in zip(word, combo)))
+        for combo in combos:
+            if sum(a != b for a, b in zip(word, combo)) > max_subs:
+                break  # list is sorted so all remaining combos exceed the cap
+            yield ''.join(combo)
 
-        for base in itertools.product(*grids):
-            v = ''.join(base)
-            for term1 in self.terminators:
-                for num in self.num_suffixes:
-                    for term2 in self.terminators:
-                        yield term1 + v + num + term2
+    def build_word_cache(self, base_words):
+        """Pre-compute leet variants for every word form (lower + capitalized).
+
+        Caching avoids recomputing the same substitutions when a word appears
+        in multiple multi-word combinations.
+        """
+        cache = {}
+        for w in base_words:
+            forms = list({w.lower(), w.capitalize()})
+            seen_variants = set()
+            ordered = []
+            for form in forms:
+                for v in self.leet_variants(form):
+                    if v not in seen_variants:
+                        seen_variants.add(v)
+                        ordered.append(v)
+            cache[w] = ordered
+        return cache
 
 
-def _generate_root_words(base_words):
-    """Generator that lazily yields 1-, 2-, and 3-word combinations without duplicates."""
+def _word_combos(base_words, n):
+    """Yield n-word combinations, prioritising permutations (no repeats) first.
+
+    Real passwords rarely repeat the exact same word multiple times (e.g.
+    busterseatterseattel).  By trying permutations first we reach the target
+    faster without ever skipping valid candidates.
+    """
     seen = set()
+    # Distinct-word permutations first (fast path for realistic passwords)
+    if n <= len(base_words):
+        for combo in itertools.permutations(base_words, n):
+            seen.add(combo)
+            yield combo
+    # Then combinations with repeated words (complete coverage)
+    for combo in itertools.product(base_words, repeat=n):
+        if combo not in seen:
+            yield combo
 
-    def emit(w):
-        if w not in seen:
-            seen.add(w)
-            return True
-        return False
 
-    for w in base_words:
-        if emit(w): yield w
-        cap = w.capitalize()
-        if emit(cap): yield cap
+def _generate_candidates(base_words, mutator):
+    """Yield every candidate password for 1-, 2-, and 3-word combinations.
 
-    for w1, w2 in itertools.product(base_words, repeat=2):
-        for combo in (w1 + w2, w1.capitalize() + w2.capitalize()):
-            if emit(combo): yield combo
+    Uses per-word leet variant caching so each word's substitutions are
+    computed only once, regardless of how many combinations it appears in.
+    Wraps each combined root with all (prefix, numeric suffix, suffix) triples.
+    """
+    cache = mutator.build_word_cache(base_words)
+    seen_roots = set()
 
-    for w1, w2, w3 in itertools.product(base_words, repeat=3):
-        for combo in (w1 + w2 + w3, w1.capitalize() + w2.capitalize() + w3.capitalize()):
-            if emit(combo): yield combo
+    for n in range(1, 4):
+        for word_combo in _word_combos(base_words, n):
+            for leet_combo in itertools.product(*[cache[w] for w in word_combo]):
+                root = ''.join(leet_combo)
+                if root in seen_roots:
+                    continue
+                seen_roots.add(root)
+                for prefix in mutator.affixes:
+                    for suffix in mutator.affixes:
+                        yield prefix + root + suffix
 
 
 def check_batch(variants_batch, target_hash):
@@ -122,24 +159,23 @@ def execute_bruteforce(dict_file, target_hash):
             batch = []
             batch_size = 5000
 
-            for root_word in _generate_root_words(base_words):
-                for variant in engine.variant_generator(root_word):
-                    batch.append(variant)
+            for candidate in _generate_candidates(base_words, engine):
+                batch.append(candidate)
 
-                    if len(batch) >= batch_size:
-                        futures.add(executor.submit(check_batch, batch, target_hash))
-                        batch = []
+                if len(batch) >= batch_size:
+                    futures.add(executor.submit(check_batch, batch, target_hash))
+                    batch = []
 
-                # Check completed futures without blocking
-                done = {f for f in futures if f.done()}
-                for fut in done:
-                    futures.discard(fut)
-                    res = fut.result()
-                    if res:
-                        result = res
+                    # Check completed futures without blocking
+                    done = {f for f in futures if f.done()}
+                    for fut in done:
+                        futures.discard(fut)
+                        res = fut.result()
+                        if res:
+                            result = res
+                            break
+                    if result:
                         break
-                if result:
-                    break
 
             if not result and batch:
                 futures.add(executor.submit(check_batch, batch, target_hash))
@@ -151,7 +187,6 @@ def execute_bruteforce(dict_file, target_hash):
                         result = res
                         break
 
-            # Cancel any futures that haven't started yet
             for fut in futures:
                 fut.cancel()
 
